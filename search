@@ -1,0 +1,52 @@
+// 使用したシート：https://docs.google.com/spreadsheets/d/1EEO8EBSdFDolrhg9c8XPuoh2afExizLkUJIvfD5K2Ns/edit#gid=542057685（データベースお試し版）
+function search() {
+  //必要なシートを取ってくる
+  var stock_sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("在庫リスト");
+  var search_sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("検索");
+  //とりあえずリセット
+  search_sheet.getRange("A6:C").clearContent();
+  //検索モードの取得
+  var mode = search_sheet.getRange("C2").getValue();
+  //検索文字列の取得→空白で分割
+  var str = search_sheet.getRange(2,2).getValue();
+  var str_array = str.split(/[ 　]+/);
+  //在庫リストを持ってくる
+  var text_list = stock_sheet.getRange("A2:C").getValues();
+  // console.log(str_array);
+  // console.log(text_list[0][1])
+  //検索
+  var y_n = true;
+  if(mode=="OR"){
+    //AND検索
+    text_list = text_list.filter(function (item){
+      str_array.some(function(s_str){
+        // console.log(item[1]);
+        if(item[1].indexOf(s_str)!=-1){
+          y_n = true;
+          return true;
+        }
+        y_n = false;
+      });
+      return y_n;
+    })
+  }else{
+    //OR検索
+    text_list = text_list.filter(function (item){
+      str_array.some(function(s_str){
+        // console.log(item[1]);
+        if(item[1].indexOf(s_str)==-1){
+          y_n = false;
+          return true;
+        }
+        y_n = true;
+      });
+      return y_n;
+    })
+  }
+
+  //結果を出力
+  var len = text_list.length;
+  console.log(len);
+  console.log(text_list);
+  search_sheet.getRange(6,1,len,3).setValues(text_list);
+}
